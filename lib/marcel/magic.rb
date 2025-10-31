@@ -115,10 +115,13 @@ module Marcel
     end
 
     def self.magic_match(io, method)
-      return magic_match(StringIO.new(io.to_s), method) unless io.respond_to?(:read)
+      return magic_match(StringIO.new(+io.to_s), method) unless io.respond_to?(:read)
 
-      io.binmode if io.respond_to?(:binmode)
-      io.set_encoding(Encoding::BINARY) if io.respond_to?(:set_encoding)
+      unless io.is_a?(StringIO)
+        io.binmode if io.respond_to?(:binmode)
+        io.set_encoding(Encoding::BINARY) if io.respond_to?(:set_encoding)
+      end
+
       buffer = (+"").encode(Encoding::BINARY)
 
       MAGIC.send(method) { |type, matches| magic_match_io(io, matches, buffer) }
